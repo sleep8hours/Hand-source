@@ -1,39 +1,68 @@
 class Vue {
     constructor(options) {
-        // 存储当前传入参数
-        this.$options = options;
-        this.$data = options.data || {};
-        this.$methods = options.methods || {};
-        this.$el = typeof options.el === "string" ? document.querySelector(options.el) : options.el;
-        // 2 将data中的数据挂载到当前实例并响应式
-        this._proxyData(this.$data);
-        // 5 method挂载到当前实例
-        this._proxyMethods(this.$methods);
-        // 3 响应式监听data数据
-        new Observer(this.$data);
-        // 4 处理指令 / 插值表达式
-        new Compiler(this);
-    }
+        let { el } = options
+        this.$el = document.querySelector(options.el)
+        this.$data = options.data || {}
+        this.$methods = options.methods || {}
 
-    _proxyData(data) {
-        Object.keys(data).forEach(d => {
-            Object.defineProperty(this, d, {
-                enumerable: true,
-                configurable: true,
-                get() {
-                    return data[d];
+        Object.keys(options.data).forEach(el =>{
+            Object.defineProperty(this,el,{
+                configurable:true,
+                enumerable:true,
+                get(){
+                    return options.data[el]
                 },
                 set(v) {
-                    if (v === data[d]) return;
-                    data[d] = v;
-                },
-            });
-        });
+                    console.log('options.data[el]',options.data[el])
+                    options.data[el] = v
+                }
+            })
+        })
+        // 代理 methods
+        Object.keys(options.methods).forEach(el =>{
+            this[el] = options.methods[el]
+        })
+
+        new Compiler(this.$el,this)
     }
 
-    _proxyMethods(methods) {
-        Object.keys(methods).forEach(m => {
-            this[m] = methods[m];
-        });
+}
+
+class Compiler {
+    constructor(node,vm) {
+        this.vm = vm
+        this.compile(node)
+
+    }
+    compile(node){
+        //  Array.from 转成真正的数组
+        Array.from(node.childNodes).forEach((el)=>{
+            // 文本节点显示
+            if(el.nodeType == 3){
+                const reg = /\{\{(.+?)\}\}/
+                let value = el.textContent
+                if(reg.test(value)){
+                    const key = RegExp.$1.trim()
+                    el.textContent = value.replace(reg, this.vm[key])
+                }
+            }
+            // 解绑属性
+            if(el.nodeType == 1){
+                Array.from(el.attributes).forEach((attr)=>{
+                    if(/^@/.test(attr.name)){
+                        let ev = attr.name.replace(/@/,'')
+                        // 绑定事件
+                        el.addEventListener(ev,( e )=>{
+                            this.vm[attr.value](e)
+                        })
+                    }
+                })
+            }
+
+
+        })
     }
 }
+
+
+export default Vue;

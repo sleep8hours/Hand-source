@@ -8,44 +8,26 @@
 </head>
 <body>
 <div id="app">
-    <h1>插值表达式</h1>
-    <h3>123{{ msg }}</h3>
-    <h3>{{ count }}</h3>
-    <h1>v-text</h1>
-    <div v-text="msg"></div>
-    <h1>v-model</h1>
-    <input type="text" v-model="msg" />
-    <input type="text" v-model="count" />
-    <div v-html="rawHtml"></div>
-    <button v-on:click="doThis">v-on:click</button>
-    <button @click="doThis">缩写v-on:click</button>
-    <button @click.stop="doThis">停止冒泡</button>
-    <button v-on:click.stop="doThis">v-on:停止冒泡</button>
+    {{msg}}
+    <button @click="handleClick">点击</button>
 </div>
-
-<script src="./src/dep.js"></script>
-<script src="./src/watcher.js"></script>
-<script src="./src/compiler.js"></script>
-<script src="./src/observer.js"></script>
-<script src="./src/vue.js"></script>
-<script>
-    // 1 创建Vue实例对象，初始化相应参数
-    let vm = new Vue({
-        el: "#app",
-        data: {
-            msg: "Hello Vue",
-            count: 20,
-            items: ["a", "b", "c"],
-            newData: { one: "1", two: 2 },
-            rawHtml: "<h2>hello Vue!</h2>",
+<script type="module">
+    import Vue from './src/vue.js'
+    const vm = new Vue({
+        el:'#app',
+        data:{
+            msg:'hello',
+            btn:'点击事件'
         },
-        methods: {
-            doThis() {
-                console.log("v-on:click");
-            },
-        },
-    });
-    console.log("实例测试：", vm);
+        methods:{
+            handleClick(){
+                this.msg = 'world'
+            }
+        }
+    })
+    vm.msg = 'node'
+    vm.handleClick()
+    window.vm = vm
 </script>
 </body>
 </html>
